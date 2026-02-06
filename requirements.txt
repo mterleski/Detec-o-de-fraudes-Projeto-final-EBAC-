@@ -1,0 +1,13 @@
+# Bibliotecas fundamentais para manipulação de dados
+pandas
+numpy
+
+# Visualização de dados
+matplotlib
+seaborn
+
+# Machine Learning e Pré-processamento
+scikit-learn
+
+# Algoritmo de Gradient Boosting
+xgboost
