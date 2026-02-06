@@ -1,53 +1,55 @@
-Introdução
-A segurança e a integridade das operações financeiras dependem da identificação ágil e precisa de atividades suspeitas, especialmente em transações de cartões de crédito. Este projeto aborda o desafio crítico da detecção de fraudes em um cenário de extremo desequilíbrio de dados, onde as ocorrências fraudulentas representam apenas 0,17% do volume total de transações. A relevância deste trabalho reside na necessidade de proteger os usuários e as instituições contra prejuízos financeiros, garantindo que o sistema seja capaz de identificar padrões anômalos de forma eficiente.
-​O objetivo principal deste projeto é implementar um modelo de aprendizado de máquina utilizando o algoritmo XGBoost para maximizar a taxa de detecção de fraudes (Recall). A solução foca na aplicação de técnicas avançadas de engenharia de atributos, como transformações cíclicas temporais e ajustes logarítmicos em valores de transação, para assegurar a precisão do modelo. Busca-se, assim, uma ferramenta eficaz que valide a segurança das transações sem comprometer a experiência do cliente com excesso de alarmes falsos. 
-Coleta de Dados
-​Os dados utilizados neste projeto foram fornecidos pela instituição financeira, estruturados em um conjunto de dados contendo 284.807 transações realizadas por portadores de cartões europeus. A base de dados é composta por 31 variáveis numéricas, sendo a maioria delas (V1 a V28) o resultado de uma transformação de Análise de Componentes Principais (PCA). Essa técnica é frequentemente aplicada pela empresa antes da disponibilização dos dados para garantir a confidencialidade de informações sensíveis dos clientes, mantendo apenas as variações estatísticas relevantes.  
-​Estrutura e Tipos de Dados:
-​Quantidade: O dataset possui 284.807 registros e 31 colunas.  
-​Variáveis: Além dos componentes V1-V28, o conjunto inclui a variável Time (segundos decorridos entre a transação atual e a primeira do conjunto), Amount (valor da transação) e a variável alvo Class.  
-​Tipos: As variáveis são predominantemente do tipo float64, com exceção da variável Class, que é um número inteiro (int64) representando a classificação binária.  
-​Limitações dos Dados:
-A principal limitação deste conjunto de dados é o seu extremo desequilíbrio de classes, onde apenas 492 transações (0,17%) são identificadas como fraudulentas, contra 284.315 transações legítimas. Além disso, devido à transformação PCA, não é possível interpretar o significado original das variáveis V1 a V28, o que limita a análise exploratória direta sobre o comportamento específico de cada atributo antes da descaracterização. O projeto também requer um tratamento específico para as variáveis Time e Amount para garantir que o modelo capture corretamente os padrões temporais e a escala financeira. 
+Detecção de Fraudes em Transações com Cartão de Crédito utilizando XGBoost
 
-3. Tratamento e Preparação dos Dados
-​A etapa de preparação foi fundamental para mitigar as limitações identificadas e potencializar a performance do algoritmo XGBoost. O processo seguiu três frentes principais:
-​Limpeza e Consistência:
-Inicialmente, foi realizada uma verificação de valores ausentes (null values) e duplicatas. Dada a natureza da fonte de dados, o conjunto apresentou-se íntegro, não exigindo técnicas de imputação. No entanto, a padronização foi aplicada às variáveis que não passaram pelo processo de PCA original (Time e Amount), garantindo que todas as features estivessem em uma escala comparável para o modelo.
-​Engenharia de Atributos (Feature Engineering):
-Para extrair o valor máximo das informações temporais e financeiras, foram aplicadas as seguintes transformações:
-​Transformação Cíclica do Tempo: A variável Time foi convertida utilizando funções de seno e cosseno. Essa escolha justifica-se pela natureza do tempo: um modelo linear teria dificuldade em entender que o final de um dia e o início do próximo são momentos próximos. A representação cíclica permite que o modelo capture padrões de periodicidade diária.
-​Transformação Logarítmica (Log Transformation): A variável Amount (valor) apresentava uma distribuição altamente assimétrica, com muitos valores baixos e alguns outliers extremamente altos. Aplicamos o logaritmo para reduzir essa variância e normalizar a distribuição, facilitando a convergência do algoritmo.
-​Divisão e Balanceamento:
-Os dados foram divididos em conjuntos de treino e teste (geralmente na proporção 80/20 ou 70/30). Devido ao desequilíbrio de classes, não utilizamos uma simples amostragem aleatória, mas sim uma estratificação para garantir que a proporção de fraudes fosse mantida em ambos os conjuntos. Para o treinamento do XGBoost, optou-se pelo ajuste do parâmetro scale_pos_weight, que atribui um peso maior à classe minoritária (fraude), em vez de realizar técnicas de oversampling como SMOTE, preservando assim a realidade estatística dos dados originais.
+1. Introdução
 
-4. Análise exploratória 
-Devido à natureza dos dados, que já passaram por um processo de Análise de Componentes Principais (PCA) por questões de privacidade e segurança da fonte original, a análise exploratória convencional de correlação entre variáveis torna-se limitada. Portanto, a análise concentrou-se na distribuição da variável alvo e nas características das variáveis não transformadas (Time e Amount). A confirmação de que o dataset é composto integralmente por variáveis numéricas e sem valores ausentes permitiu que o foco do projeto fosse direcionado para a engenharia de atributos e a otimização do algoritmo de detecção."
+A segurança e a integridade das operações financeiras dependem da identificação ágil e precisa de atividades suspeitas, especialmente em transações realizadas com cartões de crédito. Nesse contexto, a detecção de fraudes representa um desafio relevante, sobretudo em cenários de extremo desequilíbrio de dados, nos quais as ocorrências fraudulentas correspondem a apenas 0,17% do volume total de transações. A relevância deste problema está diretamente associada à necessidade de proteger usuários e instituições financeiras contra prejuízos econômicos, ao mesmo tempo em que se busca preservar uma experiência satisfatória para clientes legítimos.
 
-5.Modelagem e Estratégia de Avaliação
-​Escolha do Algoritmo:
-O modelo principal selecionado para este projeto foi o XGBoost (Extreme Gradient Boosting). A escolha justifica-se por ser um algoritmo de aprendizado de máquina baseado em árvores de decisão que utiliza o framework de gradient boosting, sendo amplamente reconhecido por sua alta performance em dados tabulares. Além disso, o XGBoost possui suporte nativo para lidar com dados desequilibrados através do parâmetro scale_pos_weight, que permite penalizar erros na classe minoritária (fraudes) com maior rigor, sem a necessidade de gerar dados sintéticos.
+O objetivo principal deste projeto é desenvolver um modelo de aprendizado de máquina baseado no algoritmo XGBoost, com foco na maximização da taxa de detecção de fraudes (Recall). A abordagem proposta utiliza técnicas de engenharia de atributos, como transformações cíclicas da variável temporal e transformações logarítmicas nos valores das transações, com o intuito de melhorar a capacidade preditiva do modelo. Busca-se, assim, uma solução eficaz que aumente a segurança das transações financeiras sem gerar um número excessivo de alarmes falsos.
 
-Estratégia de Divisão: A base de dados foi particionada em três conjuntos distintos: Treino (para aprendizado), Validação (para otimização de hiperparâmetros via GridSearchCV) e Teste (para avaliação final e imparcial). Esta abordagem garante que a performance reportada reflita a capacidade real do modelo em dados nunca vistos
+2. Coleta de Dados
 
-​Otimização de Hiperparâmetros: Foi utilizado o GridSearchCV para realizar uma busca exaustiva pelos melhores parâmetros (como profundidade da árvore, taxa de aprendizado e número de estimadores), cruzando os dados para evitar o overfitting (sobreajuste aos dados de treino).
-​Métricas de Desempenho:
-Em problemas de detecção de fraude, a Acurácia não é uma métrica confiável, pois um modelo que nunca detecta fraudes ainda teria 99,8% de acerto. Portanto, focamos em métricas que avaliam a qualidade da separação entre as classes:
-​Recall (Sensibilidade): Priorizado para garantir que o maior número possível de fraudes seja detectado (minimizar Falsos Negativos).
-​Precision (Precisão): Monitorado para evitar que muitos clientes legítimos sejam bloqueados indevidamente (minimizar Falsos Positivos).
-​AUC-ROC e Precision-Recall Curve: Utilizadas para avaliar o desempenho do modelo em diferentes limiares de decisão, sendo a curva Precision-Recall a mais indicada para este cenário de alta raridade da classe alvo.
-​Matriz de Confusão: Para visualizar de forma absoluta os acertos e erros do modelo em cada categoria.
+Os dados utilizados neste projeto foram fornecidos por uma instituição financeira e correspondem a transações realizadas por portadores de cartões europeus. O conjunto de dados é composto por 284.807 transações, organizadas em 31 variáveis numéricas.
 
-6. Resultados e Conclusão
-O modelo XGBoost apresentou um desempenho excepcional na identificação de atividades fraudulentas. A estratégia de divisão entre treino, validação e teste permitiu um ajuste fino dos parâmetros, resultando em métricas robustas mesmo diante do desequilíbrio severo dos dados.
-Desempenho no Conjunto de Teste:
-ROC AUC: 0,9785 (indicando excelente poder de discriminação).
-Recall (Classe 1): 0,83. O modelo foi capaz de capturar 83% das fraudes reais.
-Precisão (Classe 1): 0,90. Das detecções feitas pelo modelo, 90% eram fraudes confirmadas, gerando um baixo índice de alarmes falsos para clientes legítimos.
-F1-Score: 0,86 (equilíbrio entre precisão e sensibilidade).
-Análise da Matriz de Confusão: A avaliação final no conjunto de teste (56.962 transações) revelou a seguinte distribuição:
-Verdadeiros Negativos: 56.855 (transações legítimas classificadas corretamente).
-Falsos Positivos: Apenas 9 (clientes legítimos que seriam incomodados por um bloqueio).
-Falsos Negativos: 17 (fraudes que não foram detectadas).
-Verdadeiros Positivos: 81 (fraudes interrompidas com sucesso).
-Conclusão: O projeto atingiu seu objetivo ao entregar um modelo com alta confiabilidade. A combinação da engenharia de atributos (transformação cíclica e logarítmica) com a robustez do XGBoost permitiu que a instituição financeira tenha uma ferramenta que prioriza a detecção de fraudes (alto Recall) mantendo uma experiência do usuário fluida, com pouquíssimas interrupções indevidas (alta Precisão).
+A maior parte das variáveis (V1 a V28) resulta de um processo de Análise de Componentes Principais (PCA), aplicado previamente pela instituição com o objetivo de preservar a confidencialidade das informações sensíveis dos clientes. Essa técnica mantém apenas as variações estatísticas mais relevantes, impossibilitando a interpretação direta do significado original dessas variáveis.
+
+3. Estrutura e Limitações dos Dados
+
+O conjunto de dados apresenta 284.807 registros distribuídos em 31 colunas. Além das variáveis transformadas por PCA (V1 a V28), o dataset inclui a variável Time, que representa o tempo em segundos entre uma transação e a primeira transação registrada, a variável Amount, que indica o valor monetário da transação, e a variável alvo Class, responsável por indicar se a transação é legítima (0) ou fraudulenta (1).
+
+As variáveis são predominantemente do tipo float64, com exceção da variável Class, que é do tipo int64, caracterizando um problema de classificação binária.
+
+A principal limitação do conjunto de dados é o seu extremo desequilíbrio de classes. Apenas 492 transações (0,17%) são classificadas como fraudulentas, enquanto 284.315 são legítimas. Além disso, a utilização de PCA impede a interpretação direta das variáveis V1 a V28, restringindo análises exploratórias mais profundas sobre o comportamento individual de cada atributo. Diante dessas limitações, torna-se necessário um tratamento específico das variáveis Time e Amount, de modo que o modelo consiga capturar padrões temporais e financeiros relevantes.
+
+4. Tratamento e Preparação dos Dados
+
+A etapa de preparação dos dados foi fundamental para mitigar as limitações identificadas e potencializar o desempenho do algoritmo XGBoost. O processo foi conduzido em três frentes principais.
+
+Inicialmente, realizou-se a verificação da existência de valores ausentes e duplicatas. O conjunto de dados apresentou-se íntegro, não sendo necessária a aplicação de técnicas de imputação. As variáveis que não passaram pelo processo de PCA (Time e Amount) foram padronizadas, garantindo que todas as features estivessem em escalas comparáveis para o modelo.
+
+Em seguida, foram aplicadas técnicas de engenharia de atributos. A variável Time foi transformada por meio de funções seno e cosseno, de forma a representar seu comportamento cíclico. Essa abordagem permite que o modelo compreenda corretamente a proximidade temporal entre o final de um dia e o início do seguinte, capturando padrões de periodicidade diária. Já a variável Amount, que apresentava distribuição altamente assimétrica e presença de outliers, foi submetida a uma transformação logarítmica, reduzindo sua variância e facilitando a convergência do algoritmo.
+
+Por fim, os dados foram divididos em conjuntos de treino, validação e teste. A divisão foi realizada de forma estratificada, garantindo a manutenção da proporção entre classes. Para lidar com o desequilíbrio, optou-se pelo ajuste do parâmetro scale_pos_weight do XGBoost, atribuindo maior peso à classe minoritária, em vez de utilizar técnicas de oversampling como o SMOTE, preservando assim a distribuição estatística original dos dados.
+
+5. Análise Exploratória
+
+Devido à natureza dos dados, previamente transformados por Análise de Componentes Principais, a análise exploratória convencional de correlação entre variáveis torna-se limitada. Dessa forma, a análise concentrou-se principalmente na distribuição da variável alvo e nas características das variáveis não transformadas (Time e Amount).
+
+A confirmação de que o dataset é composto exclusivamente por variáveis numéricas e não apresenta valores ausentes permitiu direcionar o foco do projeto para a engenharia de atributos e a otimização do modelo de detecção de fraudes.
+
+6. Modelagem e Estratégia de Avaliação
+
+O algoritmo selecionado para este projeto foi o XGBoost (Extreme Gradient Boosting), um método baseado em árvores de decisão que utiliza o framework de gradient boosting. A escolha se justifica pela alta performance do algoritmo em dados tabulares e pelo suporte nativo ao tratamento de dados desbalanceados, por meio do parâmetro scale_pos_weight, que penaliza de forma mais rigorosa erros cometidos na classe minoritária.
+
+A base de dados foi particionada em três conjuntos distintos: treino, validação e teste. O conjunto de validação foi utilizado para a otimização de hiperparâmetros por meio do GridSearchCV, permitindo uma busca exaustiva pelos melhores valores de parâmetros como profundidade das árvores, taxa de aprendizado e número de estimadores, reduzindo o risco de sobreajuste.
+
+Em relação às métricas de avaliação, a acurácia não foi considerada adequada, uma vez que, em cenários de fraude, um modelo que classifica todas as transações como legítimas ainda apresentaria alto valor de acerto. Assim, priorizou-se o Recall, com o objetivo de minimizar falsos negativos e detectar o maior número possível de fraudes. A Precision foi monitorada para evitar impactos excessivos sobre clientes legítimos. Também foram utilizadas as métricas AUC-ROC, curva Precision-Recall e matriz de confusão, sendo esta última fundamental para a visualização direta dos acertos e erros do modelo.
+
+7. Resultados e Conclusão
+
+O modelo XGBoost apresentou desempenho elevado na identificação de transações fraudulentas. A estratégia de divisão entre treino, validação e teste permitiu um ajuste eficiente dos hiperparâmetros, resultando em métricas robustas mesmo diante do severo desequilíbrio do conjunto de dados.
+
+No conjunto de teste, o modelo alcançou um valor de AUC-ROC de 0,9785, indicando excelente capacidade de discriminação entre as classes. O Recall para a classe fraudulenta foi de 0,83, demonstrando que 83% das fraudes reais foram corretamente identificadas. A Precision atingiu 0,90, indicando que a grande maioria das detecções realizadas correspondia, de fato, a transações fraudulentas. O F1-Score foi de 0,86, refletindo um bom equilíbrio entre sensibilidade e precisão.
+
+A matriz de confusão revelou 56.855 verdadeiros negativos, apenas 9 falsos positivos, 17 falsos negativos e 81 verdadeiros positivos, evidenciando um impacto mínimo sobre clientes legítimos e uma alta taxa de fraudes interrompidas.
+
+Conclui-se que o projeto atingiu seu objetivo ao entregar um modelo confiável e eficiente para detecção de fraudes. A combinação de engenharia de atributos bem fundamentada com a robustez do algoritmo XGBoost permitiu priorizar a identificação de transações fraudulentas sem comprometer a experiência do usuário, tornando a solução aplicável a cenários reais de instituições financeiras.
