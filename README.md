@@ -2,81 +2,130 @@
 
 ## 📌 Visão Geral
 
-Este projeto aborda o problema crítico da **detecção de fraudes em transações de cartão de crédito** em um cenário de **extremo desbalanceamento de classes**, onde apenas **0,17%** das transações são fraudulentas. O objetivo central é construir um modelo robusto de *Machine Learning* capaz de identificar atividades suspeitas com alta confiabilidade, protegendo tanto clientes quanto instituições financeiras.
+Fraudes em cartões de crédito geram prejuízos bilionários todos os anos para bancos, empresas e consumidores. Identificar transações suspeitas rapidamente é um desafio complexo, principalmente porque os casos de fraude representam apenas uma pequena fração de todas as operações realizadas.
 
-A solução utiliza o algoritmo **XGBoost**, com foco na **maximização do Recall**, garantindo que o maior número possível de fraudes seja detectado, sem gerar excesso de falsos alarmes que prejudiquem a experiência do usuário.
+Neste projeto, desenvolvi um modelo de **Machine Learning** capaz de identificar transações potencialmente fraudulentas em um cenário de **extremo desbalanceamento de dados**, onde apenas **0,17% das transações são fraudes**.
+
+A solução foi construída utilizando **XGBoost**, um dos algoritmos mais utilizados em problemas de classificação tabular, com foco especial em detectar o maior número possível de fraudes sem gerar um volume excessivo de alertas incorretos.
+
+---
+
+## 💼 Contexto de Negócio
+
+Imagine uma instituição financeira processando milhões de transações diariamente.
+
+Se um sistema simplesmente classificasse todas as operações como legítimas, ele alcançaria mais de 99% de acurácia, mas deixaria passar praticamente todas as fraudes.
+
+Por isso, em problemas como este, o objetivo não é apenas acertar a maioria dos casos, mas sim identificar eventos raros e de alto impacto financeiro.
+
+O desafio consiste em encontrar um equilíbrio entre:
+
+* Detectar o maior número possível de fraudes.
+* Evitar bloquear ou sinalizar transações legítimas de clientes.
 
 ---
 
 ## 🎯 Objetivo do Projeto
 
-* Desenvolver um modelo de classificação binária para detecção de fraudes.
-* Lidar adequadamente com dados altamente desbalanceados.
-* Aplicar **engenharia de atributos avançada** para melhorar a capacidade preditiva.
-* Avaliar o modelo com métricas apropriadas ao contexto de fraude.
+O projeto teve como objetivos:
+
+* Desenvolver um modelo de classificação binária para identificar fraudes.
+* Tratar adequadamente um conjunto de dados altamente desbalanceado.
+* Aplicar técnicas de engenharia de atributos para aumentar o poder preditivo do modelo.
+* Avaliar o desempenho utilizando métricas adequadas para problemas de fraude.
+* Demonstrar como técnicas de Machine Learning podem apoiar processos de prevenção a perdas financeiras.
 
 ---
 
 ## 📊 Conjunto de Dados
 
-Os dados foram fornecidos por uma instituição financeira e correspondem a transações realizadas por portadores de cartões europeus.
+Os dados foram disponibilizados por uma instituição financeira e representam transações realizadas por portadores de cartões europeus.
+
+### Visão Geral
 
 * **Total de registros:** 284.807 transações
 * **Total de variáveis:** 31
-* **Variável alvo:** `Class` (0 = legítima, 1 = fraude)
+* **Variável alvo:** `Class`
+
+  * `0` = transação legítima
+  * `1` = fraude
 
 ### Estrutura das Variáveis
 
-* `V1` a `V28`: Componentes numéricos resultantes de **PCA**, aplicados para preservar a confidencialidade dos dados.
-* `Time`: Tempo em segundos desde a primeira transação registrada.
-* `Amount`: Valor monetário da transação.
+Para preservar a privacidade dos clientes, a maior parte das informações originais foi anonimizada utilizando **PCA (Principal Component Analysis)**.
 
-### Desbalanceamento
+* `V1` a `V28`: componentes numéricos resultantes do PCA.
+* `Time`: tempo em segundos desde a primeira transação registrada.
+* `Amount`: valor monetário da transação.
 
-* Transações legítimas: 284.315 (99,83%)
-* Transações fraudulentas: 492 (0,17%)
+### Desbalanceamento das Classes
 
-Esse desequilíbrio extremo exige estratégias específicas de modelagem e avaliação.
+| Classe   | Quantidade | Percentual |
+| -------- | ---------- | ---------- |
+| Legítima | 284.315    | 99,83%     |
+| Fraude   | 492        | 0,17%      |
+
+Esse cenário reproduz um problema comum do mundo real: as fraudes são raras, mas extremamente importantes de detectar.
 
 ---
 
-## 🧹 Tratamento e Preparação dos Dados
+## 🧹 Preparação dos Dados
 
 ### Limpeza e Padronização
 
-* Verificação de valores ausentes (nenhum valor nulo encontrado).
-* Padronização das variáveis `Time` e `Amount`, que não passaram pelo PCA original.
+A primeira etapa consistiu na análise da qualidade dos dados.
+
+* Verificação de valores ausentes.
+* Verificação de inconsistências.
+* Padronização das variáveis `Time` e `Amount`, que não haviam passado pelo processo de PCA.
+
+Nenhum valor nulo foi identificado no conjunto analisado.
 
 ### Engenharia de Atributos
 
-* **Transformação Cíclica do Tempo:**
+Buscando extrair mais informação dos dados disponíveis, foram criadas novas representações para algumas variáveis.
 
-  * Aplicação de seno e cosseno sobre a variável `Time` para capturar padrões periódicos diários.
-* **Transformação Logarítmica do Valor:**
+#### Tempo Cíclico
 
-  * Aplicação de log na variável `Amount` para reduzir assimetria e impacto de outliers.
+O horário de uma transação pode influenciar a probabilidade de fraude.
+
+Por exemplo, uma operação realizada às 23h59 está muito mais próxima de uma realizada às 00h01 do que de uma realizada às 12h.
+
+Para capturar esse comportamento periódico, foram aplicadas transformações seno e cosseno sobre a variável temporal.
+
+#### Transformação Logarítmica
+
+A variável de valor monetário apresentava forte assimetria devido à presença de transações muito altas.
+
+Foi aplicada uma transformação logarítmica para reduzir a influência de outliers e facilitar o aprendizado do modelo.
 
 ### Divisão dos Dados
 
-* **Treino:** aprendizado do modelo
-* **Validação:** ajuste de hiperparâmetros via `GridSearchCV`
-* **Teste:** avaliação final e imparcial
+O conjunto foi dividido em três etapas:
 
-### Balanceamento
+* **Treino:** aprendizado do modelo.
+* **Validação:** ajuste de hiperparâmetros.
+* **Teste:** avaliação final em dados nunca vistos.
 
-* Utilização do parâmetro `scale_pos_weight` do XGBoost para penalizar a classe minoritária.
-* Não foi utilizado *oversampling* (ex: SMOTE), preservando a distribuição original dos dados.
+### Tratamento do Desbalanceamento
+
+Em vez de criar observações artificiais, foi utilizada uma abordagem nativa do XGBoost por meio do parâmetro `scale_pos_weight`.
+
+Essa estratégia aumenta a penalização dos erros cometidos na classe de fraude, incentivando o modelo a prestar mais atenção nos casos raros.
 
 ---
 
 ## 🔎 Análise Exploratória
 
-Devido ao uso prévio de PCA, a análise exploratória foi limitada à:
+Devido ao processo de anonimização por PCA, a interpretação individual das variáveis é limitada.
 
-* Distribuição da variável alvo (`Class`).
-* Avaliação das variáveis `Time` e `Amount`.
+Por esse motivo, a análise exploratória concentrou-se em:
 
-A ausência de valores ausentes e a natureza numérica das variáveis permitiram direcionar o foco para engenharia de atributos e modelagem.
+* Distribuição das classes.
+* Comportamento das variáveis `Time` e `Amount`.
+* Verificação de qualidade dos dados.
+
+A exploração inicial confirmou que o principal desafio do projeto seria o forte desbalanceamento entre fraudes e transações legítimas.
 
 ---
 
@@ -84,33 +133,59 @@ A ausência de valores ausentes e a natureza numérica das variáveis permitiram
 
 ### Algoritmo Utilizado
 
-* **XGBoost (Extreme Gradient Boosting)**
+Foi utilizado o algoritmo **XGBoost (Extreme Gradient Boosting)**, amplamente reconhecido por seu desempenho em competições de ciência de dados e aplicações empresariais.
 
-  * Alta performance em dados tabulares.
-  * Suporte nativo a dados desbalanceados.
-  * Forte capacidade de generalização.
+Principais vantagens:
 
-### Otimização
+* Excelente desempenho em dados tabulares.
+* Robustez diante de relações complexas entre variáveis.
+* Capacidade de lidar com classes desbalanceadas.
+* Boa capacidade de generalização.
 
-* Ajuste de hiperparâmetros via **GridSearchCV**.
-* Busca por parâmetros como:
+### Otimização do Modelo
 
-  * Profundidade das árvores
-  * Taxa de aprendizado
-  * Número de estimadores
+Os hiperparâmetros foram ajustados utilizando **GridSearchCV**, permitindo testar diferentes combinações de configurações.
+
+Entre os parâmetros avaliados estavam:
+
+* Profundidade máxima das árvores.
+* Taxa de aprendizado.
+* Quantidade de estimadores.
+* Configurações de regularização.
 
 ---
 
 ## 📈 Métricas de Avaliação
 
-Em detecção de fraudes, a acurácia isolada não é informativa. As métricas priorizadas foram:
+Em problemas de fraude, a acurácia isoladamente pode ser enganosa.
 
-* **Recall (Sensibilidade)** – métrica principal
-* **Precision (Precisão)**
-* **F1-Score**
-* **ROC AUC**
-* **Curva Precision-Recall** (mais adequada para classes raras)
-* **Matriz de Confusão**
+Por isso, foram utilizadas métricas mais adequadas ao contexto:
+
+### Recall (Métrica Principal)
+
+Indica quantas fraudes reais foram identificadas pelo modelo.
+
+Quanto maior o Recall, menor a quantidade de fraudes que passam despercebidas.
+
+### Precision
+
+Indica quantos alertas de fraude emitidos pelo modelo realmente eram fraudes.
+
+### F1-Score
+
+Combina Recall e Precision em uma única métrica.
+
+### ROC AUC
+
+Mede a capacidade geral de separação entre transações legítimas e fraudulentas.
+
+### Curva Precision-Recall
+
+Particularmente importante em conjuntos altamente desbalanceados.
+
+### Matriz de Confusão
+
+Permite visualizar detalhadamente os acertos e erros do modelo.
 
 ---
 
@@ -118,35 +193,65 @@ Em detecção de fraudes, a acurácia isolada não é informativa. As métricas 
 
 ### Desempenho no Conjunto de Teste
 
-* **ROC AUC:** 0,9785
-* **Recall (fraudes):** 0,83
-* **Precisão (fraudes):** 0,90
-* **F1-Score:** 0,86
+| Métrica  | Resultado |
+| -------- | --------- |
+| ROC AUC  | 0,9785    |
+| Recall   | 0,83      |
+| Precisão | 0,90      |
+| F1-Score | 0,86      |
 
-### Matriz de Confusão (56.962 transações)
+### Matriz de Confusão
+
+Em um conjunto de **56.962 transações**:
 
 * Verdadeiros Negativos: 56.855
 * Falsos Positivos: 9
 * Falsos Negativos: 17
 * Verdadeiros Positivos: 81
 
-Os resultados demonstram excelente capacidade de detecção com impacto mínimo sobre clientes legítimos.
+### Interpretação dos Resultados
+
+Em termos práticos:
+
+* O modelo identificou aproximadamente **83% das fraudes existentes**.
+* Apenas **9 transações legítimas** foram classificadas incorretamente como fraude.
+* A maioria das operações legítimas passou pelo sistema sem qualquer impacto ao cliente.
+
+Esses resultados demonstram uma solução equilibrada entre segurança e experiência do usuário.
 
 ---
 
 ## 🏁 Conclusão
 
-O projeto atingiu plenamente seu objetivo ao entregar um modelo altamente confiável para detecção de fraudes. A combinação de **engenharia de atributos bem fundamentada** com a robustez do **XGBoost** permitiu maximizar o Recall sem comprometer a Precisão, resultando em uma solução eficaz e aplicável em cenários reais de instituições financeiras.
+Este projeto demonstra a aplicação de técnicas de Machine Learning em um problema real de alto impacto financeiro.
+
+Mesmo diante de um cenário extremamente desbalanceado, a combinação de **engenharia de atributos**, **tratamento adequado das classes** e **XGBoost** permitiu construir um modelo com excelente capacidade de detecção.
+
+Além dos resultados quantitativos, o projeto reforça a importância de selecionar métricas alinhadas ao contexto de negócio, especialmente em aplicações onde o custo dos erros não é uniforme.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
 * Python
-* Pandas / NumPy
+* Pandas
+* NumPy
 * Scikit-learn
 * XGBoost
-* Matplotlib / Seaborn
+* Matplotlib
+* Seaborn
+
+---
+
+## 🚀 Principais Aprendizados
+
+Durante o desenvolvimento deste projeto, foram explorados conceitos importantes de Ciência de Dados e Machine Learning, incluindo:
+
+* Tratamento de bases altamente desbalanceadas.
+* Engenharia de atributos para variáveis temporais.
+* Ajuste de hiperparâmetros com validação cruzada.
+* Avaliação de modelos utilizando métricas orientadas ao negócio.
+* Construção de soluções voltadas para problemas reais de detecção de anomalias e prevenção a fraudes.
 
 ---
 
